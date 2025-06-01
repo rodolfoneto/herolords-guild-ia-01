@@ -30,6 +30,7 @@
                     @endif
                 @else
                     <a href="{{ route('admin.roles.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">Manage Roles</a> 
+                    <a href="{{ route('admin.permissions.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">Manage Permissions</a>
                     <span class="text-gray-600 mr-4">{{ Auth::user()->name }}</span>
                     <a href="{{ route('logout') }}"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\PermissionController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -17,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         // You might want to add an admin-specific middleware here, e.g., ->middleware('is_admin')
         Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
     });
 });
 

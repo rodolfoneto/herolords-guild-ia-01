@@ -34,7 +34,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::all()->pluck('name', 'id');
+        $permissions = Permission::all()->pluck('name', 'uuid');
         return view('admin.roles.create', compact('permissions'));
     }
 
@@ -46,10 +46,10 @@ class RoleController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:roles,name',
             'permissions' => 'array',
-            'permissions.*' => 'string|exists:permissions,name' // Ensure permissions exist by name
+            'permissions.*' => 'string|exists:permissions,name'
         ]);
 
-        $role = Role::create(['name' => $request->name, 'guard_name' => 'web']); // Ensure guard_name if not default
+        $role = Role::create(['name' => $request->name, 'guard_name' => 'web']);
 
         if ($request->has('permissions')) {
             $role->givePermissionTo($request->permissions);
@@ -72,7 +72,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        $permissions = Permission::all()->pluck('name', 'id');
+        $permissions = Permission::all()->pluck('name', 'uuid');
         $rolePermissions = $role->permissions->pluck('name')->toArray();
         return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }
@@ -83,19 +83,18 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
+            'name' => 'required|string|max:255|unique:roles,name,' . $role->uuid . ',uuid',
             'permissions' => 'array',
-            'permissions.*' => 'string|exists:permissions,name' // Ensure permissions exist by name
+            'permissions.*' => 'string|exists:permissions,name'
         ]);
 
         $role->name = $request->name;
         $role->save();
 
-        // Sync permissions
         if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);
         } else {
-            $role->syncPermissions([]); // Remove all permissions if none are provided
+            $role->syncPermissions([]);
         }
 
         return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
@@ -106,7 +105,6 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        // Optional: Add checks here, e.g., don't delete critical roles like 'Super Admin'
         if ($role->name === 'Super Admin') {
             return redirect()->route('admin.roles.index')->with('error', 'Cannot delete the Super Admin role.');
         }
