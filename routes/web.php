@@ -16,9 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin Routes for Roles
     Route::prefix('admin')->name('admin.')->group(function () {
-        // You might want to add an admin-specific middleware here, e.g., ->middleware('is_admin')
-        Route::resource('roles', RoleController::class);
-        Route::resource('permissions', PermissionController::class);
+        Route::resource('roles', RoleController::class)->except(['show']);
+        Route::resource('permissions', PermissionController::class)->except(['show']);
     });
 });
 

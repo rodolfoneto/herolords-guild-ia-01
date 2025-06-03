@@ -8,6 +8,7 @@ use App\Models\{
     Permission,
 };
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RoleController extends Controller
 {
@@ -25,8 +26,9 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::latest()->paginate(10);
-        return view('admin.roles.index', compact('roles'));
+        $roles = Role::latest()->with('permissions')->paginate(10);
+        return Inertia::render('Admin/Role/RoleIndex', compact('roles'));
+        // return view('admin.roles.index', compact('roles'));
     }
 
     /**
@@ -34,8 +36,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::all()->pluck('name', 'uuid');
-        return view('admin.roles.create', compact('permissions'));
+        $permissions = Permission::select('uuid', 'name')->get();
+        return Inertia::render('Admin/Role/RoleCreate', compact('permissions'));
     }
 
     /**
@@ -55,16 +57,8 @@ class RoleController extends Controller
             $role->givePermissionTo($request->permissions);
         }
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Role $role)
-    {
-        $rolePermissions = $role->permissions->pluck('name');
-        return view('admin.roles.show', compact('role', 'rolePermissions'));
+        // return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+        return to_route('admin.roles.index');
     }
 
     /**
@@ -72,9 +66,10 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        $permissions = Permission::all()->pluck('name', 'uuid');
+        $permissions = Permission::query()->select('name')->get();//->pluck('name', 'uuid');
         $rolePermissions = $role->permissions->pluck('name')->toArray();
-        return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        // return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        return Inertia::render('Admin/Role/RoleEdit', compact('role', 'permissions', 'rolePermissions'));
     }
 
     /**
@@ -97,7 +92,8 @@ class RoleController extends Controller
             $role->syncPermissions([]);
         }
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+        //  return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+        return to_route('admin.roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**
